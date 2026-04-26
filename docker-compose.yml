@@ -1,0 +1,57 @@
+services:
+  vote:
+    container_name: voting
+    build: ./vote
+    ports:
+      - 5000:80
+    networks:
+      - back-network
+    depends_on:
+      - redis
+
+  result:
+    container_name: result
+    build: ./result
+    ports:
+      - 5001:4000
+    networks:
+      - back-network
+      - db-network
+    depends_on:
+      - db
+
+
+  worker:
+    container_name: worker
+    build: ./worker
+    depends_on:
+      - redis
+      - db
+    networks:
+      - back-network 
+      - db-network  
+  
+  redis:
+    container_name: redis
+    image: redis:alpine
+  
+    networks:
+      - back-network
+
+  db:
+    container_name: database
+    image: postgres:15-alpine
+    networks:
+      - db-network
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: mohamed
+      POSTGRES_PASSWORD: 1
+      POSTGRES_DB: postgres
+
+networks:
+  db-network:
+  back-network:
+volumes:
+  db-data:
